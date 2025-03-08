@@ -45,7 +45,7 @@ struct SignUpVC: View {
             }
             
             VStack {
-                DefaultButton(buttonText: "Giriş Yap", buttonColor: .primaryA, buttonTextColor: .white) {
+                DefaultButton(buttonText: "Kayıt Ol", buttonColor: .primaryA, buttonTextColor: .white) {
                     // Sign Up Action
                     authViewModel.signUp()
                 }

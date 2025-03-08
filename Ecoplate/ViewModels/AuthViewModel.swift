@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 class AuthViewModel: ObservableObject {
     
@@ -31,11 +32,49 @@ class AuthViewModel: ObservableObject {
     
     // Login Function
     func login() {
-        // Login
+        guard !email.isEmpty, !password.isEmpty else {
+            print("Email and password should not be empty.")
+            return
+        }
+        
+        isLoading = true
+        
+        Auth.auth().signIn(withEmail: email, password: password) { result, error in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                if let error = error {
+                    print("Failed to login: \(error.localizedDescription)")
+                    return
+                }
+                
+                self.isLoggedIn = true
+                print("Successfully logged in as \(result?.user.uid ?? "")")
+            }
+        }
     }
     
-    // Sign Up Function
+    // MARK: - Sign Up Function
     func signUp() {
-        // Sign Up
+        guard !signUpEmail.isEmpty, !signUpPassword.isEmpty, signUpPassword == signUpPasswordAgain else {
+            print("Make sure passwords match and fields are not empty.")
+            return
+        }
+        
+        isLoading = true
+        
+        Auth.auth().createUser(withEmail: signUpEmail, password: signUpPassword) { result, error in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                if let error = error {
+                    print("Failed to sign up: \(error.localizedDescription)")
+                    return
+                }
+                
+                self.isLoggedIn = true
+                print("Successfully signed up as \(result?.user.uid ?? "")")
+            }
+        }
     }
 }
