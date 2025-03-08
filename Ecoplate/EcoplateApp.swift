@@ -11,7 +11,7 @@ import SwiftUI
 struct EcoplateApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            LoginVC()
         }
     }
 }
