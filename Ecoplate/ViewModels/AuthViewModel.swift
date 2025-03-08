@@ -33,4 +33,9 @@ class AuthViewModel: ObservableObject {
     func login() {
         // Login
     }
+    
+    // Sign Up Function
+    func signUp() {
+        // Sign Up
+    }
 }

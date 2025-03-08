@@ -58,6 +58,7 @@ struct LoginVC: View {
             VStack {
                 DefaultButton(buttonText: "Giriş Yap", buttonColor: .primaryA, buttonTextColor: .white) {
                     // Login Action
+                    authViewModel.login()
                 }
                 .padding(.top)
                 
