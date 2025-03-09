@@ -55,7 +55,7 @@ struct SignUpVC: View {
                     HStack {
                         Button {
                             // Go Login Page
-                            authViewModel.goLoginVC = true
+                            authViewModel.goSignUpVC = false
                         } label: {
                             Text("Hesabınız var mı? ")
                                 .font(.subheadline)
