@@ -12,41 +12,46 @@ struct MarketVC: View {
     // Parameters
     @State private var searchText: String = ""
     
+    // Is Loading
+    @State private var isLoading: Bool = false
+    
     var body: some View {
-        VStack {
-            VStack(spacing: 16) {
-                Image(systemName: "carrot.fill")
-                    .foregroundColor(.orange)
-                
-                HStack {
-                    Image(systemName: "mappin.circle.fill")
-                    
-                    Text("İstanbul, Türkiye")
-                }
-                
-                // Search Bar
-                CustomSearchBar(searchText: $searchText, placeHolder: "Mağaza ya da ürün ara...")
-            }
-            .padding(.horizontal)
-            
-            ScrollView(.vertical, showsIndicators: false) {
+        BaseView(isLoading: $isLoading) {
+            VStack {
                 VStack(spacing: 16) {
-                    Image(.banner)
-                        .padding([.top, .horizontal])
+                    Image(systemName: "carrot.fill")
+                        .foregroundColor(.orange)
                     
-                    VStack(alignment: .leading) {
-                        Text("Özel Teklif")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                            .padding(.horizontal)
+                    HStack {
+                        Image(systemName: "mappin.circle.fill")
                         
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack {
-                                ForEach(0..<5, id: \.self) { _ in
-                                    ProductCardView(productName: "Biber", productOldPrice: 10.99, productDiscountedPrice: 8.99)
+                        Text("İstanbul, Türkiye")
+                    }
+                    
+                    // Search Bar
+                    CustomSearchBar(searchText: $searchText, placeHolder: "Mağaza ya da ürün ara...")
+                }
+                .padding(.horizontal)
+                
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: 16) {
+                        Image(.banner)
+                            .padding([.top, .horizontal])
+                        
+                        VStack(alignment: .leading) {
+                            Text("Özel Teklif")
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                                .padding(.horizontal)
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack {
+                                    ForEach(0..<5, id: \.self) { _ in
+                                        ProductCardView(productName: "Biber", productOldPrice: 10.99, productDiscountedPrice: 8.99)
+                                    }
                                 }
+                                .padding(.leading)
                             }
-                            .padding(.leading)
                         }
                     }
                 }

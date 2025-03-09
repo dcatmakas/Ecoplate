@@ -24,11 +24,11 @@ struct MainVC: View {
                     ExploreVC()
                         .tag(1)
                     CartVC()
-                        .tag(3)
+                        .tag(2)
                     FavoritesVC()
-                        .tag(4)
+                        .tag(3)
                     ProfileVC()
-                        .tag(5)
+                        .tag(4)
                 }
                 .tabViewStyle(DefaultTabViewStyle())
             }

@@ -29,11 +29,25 @@ class AuthViewModel: ObservableObject {
     // Login Status
     @Published var isLoggedIn: Bool = false
     
+    // Global State
+    private let globalState: GlobalState
+
+    init(globalState: GlobalState = GlobalState.shared) {
+        self.globalState = globalState
+        if Auth.auth().currentUser != nil {
+            self.isLoggedIn = true
+        } else {
+            self.isLoggedIn = false
+        }
+    }
+    
     
     // Login Function
     func login() {
         guard !email.isEmpty, !password.isEmpty else {
-            print("Email and password should not be empty.")
+            globalState.alertMessage = "Email ya da şifre boş bırakılamaz."
+            globalState.showAlert = true
+            print("Email ya da şifre boş bırakılamaz.")
             return
         }
         
@@ -43,8 +57,9 @@ class AuthViewModel: ObservableObject {
             DispatchQueue.main.async {
                 self.isLoading = false
                 
-                if let error = error {
-                    print("Failed to login: \(error.localizedDescription)")
+                if error != nil {
+                    self.globalState.alertMessage = "Kullanıcı adı ya da şifre hatalı."
+                    self.globalState.showAlert = true
                     return
                 }
                 
@@ -57,7 +72,9 @@ class AuthViewModel: ObservableObject {
     // MARK: - Sign Up Function
     func signUp() {
         guard !signUpEmail.isEmpty, !signUpPassword.isEmpty, signUpPassword == signUpPasswordAgain else {
-            print("Make sure passwords match and fields are not empty.")
+            globalState.alertMessage = "Şifrelerin eşleştiğinden ve hiçbir şeyi boş bırakmadığınızdan emin olunuz."
+            globalState.showAlert = true
+            print("Şifrelerin eşleştiğinden ve hiçbir şeyi boş bırakmadığınızdan emin olunuz.")
             return
         }
         
@@ -68,6 +85,8 @@ class AuthViewModel: ObservableObject {
                 self.isLoading = false
                 
                 if let error = error {
+                    self.globalState.alertMessage = "Kayıt olurken bir sorun oluştu."
+                    self.globalState.showAlert = true
                     print("Failed to sign up: \(error.localizedDescription)")
                     return
                 }
@@ -75,6 +94,16 @@ class AuthViewModel: ObservableObject {
                 self.isLoggedIn = true
                 print("Successfully signed up as \(result?.user.uid ?? "")")
             }
+        }
+    }
+    
+    // Çıkış Yapma
+    func logout() {
+        do {
+            try Auth.auth().signOut()
+            isLoggedIn = false
+        } catch {
+            print("Error signing out: \(error.localizedDescription)")
         }
     }
 }

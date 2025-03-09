@@ -8,9 +8,20 @@
 import SwiftUI
 
 struct ProfileVC: View {
+    
+    @EnvironmentObject var authViewModel: AuthViewModel
+    
     var body: some View {
-        VStack {
-            
+        BaseView(isLoading: $authViewModel.isLoading) {
+            VStack {
+                Button {
+                    authViewModel.logout()
+                } label: {
+                    Text("Çıkış yap")
+                        .foregroundColor(.red)
+                }
+                
+            }
         }
     }
 }

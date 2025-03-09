@@ -7,6 +7,7 @@
 
 import SwiftUI
 import FirebaseCore
+import FirebaseAuth
 
 class AppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication,
@@ -20,9 +21,19 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 struct EcoplateApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
+    @StateObject var authViewModel = AuthViewModel()
+    
     var body: some Scene {
         WindowGroup {
-            LoginVC()
+            if authViewModel.isLoggedIn {
+                MainVC()
+                    .environmentObject(GlobalState.shared)
+                    .environmentObject(authViewModel)
+            } else {
+                LoginVC()
+                    .environmentObject(GlobalState.shared)
+                    .environmentObject(authViewModel)
+            }
         }
     }
 }
