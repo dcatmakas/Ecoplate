@@ -7,6 +7,7 @@
 
 import SwiftUI
 import FirebaseAuth
+import FirebaseFirestore
 
 class AuthViewModel: ObservableObject {
     
@@ -31,7 +32,7 @@ class AuthViewModel: ObservableObject {
     
     // Global State
     private let globalState: GlobalState
-
+    
     init(globalState: GlobalState = GlobalState.shared) {
         self.globalState = globalState
         if Auth.auth().currentUser != nil {
@@ -42,7 +43,7 @@ class AuthViewModel: ObservableObject {
     }
     
     
-    // Login Function
+    // MARK: Login Function
     func login() {
         guard !email.isEmpty, !password.isEmpty else {
             globalState.alertMessage = "Email ya da şifre boş bırakılamaz."
@@ -91,13 +92,54 @@ class AuthViewModel: ObservableObject {
                     return
                 }
                 
-                self.isLoggedIn = true
-                print("Successfully signed up as \(result?.user.uid ?? "")")
+                if let user = result?.user {
+                    self.saveUserToFirestore(user: user)
+                }
             }
         }
     }
     
-    // Çıkış Yapma
+    // MARK: - Save User
+    private func saveUserToFirestore(user: User) {
+        let db = Firestore.firestore()
+        let userEmail = user.email ?? ""
+        let userId = user.uid
+        
+        let authData: [String: Any] = [
+            "is_user": true
+        ]
+        
+        db.collection("auth")
+            .document(userEmail)
+            .setData(authData) { error in
+                if let error = error {
+                    self.globalState.alertMessage = "Kullanıcı bilgileri kaydedilirken hata oluştu: \(error.localizedDescription)"
+                    self.globalState.showAlert = true
+                    print("Error saving user to Firestore (auth): \(error.localizedDescription)")
+                } else {
+                    print("User saved to Firestore (auth) with email: \(userEmail)")
+                }
+            }
+        
+        let userData: [String: Any] = [
+            "mail_address": userEmail
+        ]
+        
+        db.collection("users")
+            .document(userId)
+            .setData(userData) { error in
+                if let error = error {
+                    self.globalState.alertMessage = "Kullanıcı bilgileri kaydedilirken hata oluştu: \(error.localizedDescription)"
+                    self.globalState.showAlert = true
+                    print("Error saving user to Firestore (users): \(error.localizedDescription)")
+                } else {
+                    self.isLoggedIn = true
+                    print("User saved to Firestore (users) with id: \(userId)")
+                }
+            }
+    }
+    
+    // MARK: Logout
     func logout() {
         do {
             try Auth.auth().signOut()
