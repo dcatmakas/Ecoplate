@@ -30,6 +30,9 @@ class AuthViewModel: ObservableObject {
     // Login Status
     @Published var isLoggedIn: Bool = false
     
+    // User Control
+    @Published var isUser: Bool = true
+    
     // Global State
     private let globalState: GlobalState
     
@@ -43,32 +46,63 @@ class AuthViewModel: ObservableObject {
     }
     
     
-    // MARK: Login Function
-    func login() {
-        guard !email.isEmpty, !password.isEmpty else {
-            globalState.alertMessage = "Email ya da şifre boş bırakılamaz."
-            globalState.showAlert = true
-            print("Email ya da şifre boş bırakılamaz.")
-            return
-        }
-        
-        isLoading = true
-        
-        Auth.auth().signIn(withEmail: email, password: password) { result, error in
-            DispatchQueue.main.async {
-                self.isLoading = false
-                
-                if error != nil {
-                    self.globalState.alertMessage = "Kullanıcı adı ya da şifre hatalı."
-                    self.globalState.showAlert = true
-                    return
+    // MARK: - Login Function
+        func login() {
+            guard !email.isEmpty, !password.isEmpty else {
+                globalState.alertMessage = "Email ya da şifre boş bırakılamaz."
+                globalState.showAlert = true
+                print("Email ya da şifre boş bırakılamaz.")
+                return
+            }
+            
+            isLoading = true
+            
+            Auth.auth().signIn(withEmail: email, password: password) { result, error in
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                    
+                    if let error = error {
+                        self.globalState.alertMessage = "Kullanıcı adı ya da şifre hatalı: \(error.localizedDescription)"
+                        self.globalState.showAlert = true
+                        print("Login failed: \(error.localizedDescription)")
+                        return
+                    }
+                    
+                    if let user = result?.user {
+                        self.fetchUserData(email: user.email ?? "")
+                    }
                 }
-                
-                self.isLoggedIn = true
-                print("Successfully logged in as \(result?.user.uid ?? "")")
             }
         }
-    }
+        
+        // MARK: - Fetch User Data (auth -> mail -> is_user)
+        private func fetchUserData(email: String) {
+            let db = Firestore.firestore()
+            
+            db.collection("auth")
+                .document(email)
+                .getDocument { document, error in
+                    if let error = error {
+                        self.globalState.alertMessage = "Kullanıcı bilgileri çekilirken hata oluştu: \(error.localizedDescription)"
+                        self.globalState.showAlert = true
+                        print("Error fetching user data: \(error.localizedDescription)")
+                        return
+                    }
+                    
+                    if let document = document, document.exists {
+                        if let isUser = document.data()?["is_user"] as? Bool {
+                            self.isUser = isUser
+                            print("User data fetched - isUser: \(self.isUser)")
+                        }
+                        
+                        self.isLoggedIn = true
+                    } else {
+                        self.globalState.alertMessage = "Kullanıcı bilgisi bulunamadı."
+                        self.globalState.showAlert = true
+                        print("User document not found.")
+                    }
+                }
+        }
     
     // MARK: - Sign Up Function
     func signUp() {
