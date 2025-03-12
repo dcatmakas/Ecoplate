@@ -25,8 +25,12 @@ struct EcoplateApp: App {
     
     var body: some Scene {
         WindowGroup {
-            if authViewModel.isLoggedIn {
+            if authViewModel.isLoggedInUser && authViewModel.isUser {
                 MainVC()
+                    .environmentObject(GlobalState.shared)
+                    .environmentObject(authViewModel)
+            } else if authViewModel.isLoggedInMarket && !authViewModel.isUser {
+                CustomerMainVC()
                     .environmentObject(GlobalState.shared)
                     .environmentObject(authViewModel)
             } else {
